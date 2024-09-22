@@ -1,1 +1,22 @@
-12345
+CREATE DATABASE User
+use User
+-- Tạo bảng users để lưu trữ email và mật khẩu của người dùng
+CREATE TABLE users (
+    id INT PRIMARY KEY IDENTITY(1,1),  -- ID tự động tăng
+    email NVARCHAR(255) NOT NULL UNIQUE,  -- Email là duy nhất
+    password NVARCHAR(255) NOT NULL  -- Mật khẩu
+);
+-- Thêm dữ liệu mẫu vào bảng users
+INSERT INTO Users (email, password)
+VALUES 
+('user1@example.com', 'password123'),
+('user2@example.com', 'passw0rd'),
+('user3@example.com', 'rocknroll');
+
+ALTER TABLE Users
+ADD CONSTRAINT chk_email_format
+CHECK (email LIKE '%@gmail.com');
+
+ALTER TABLE Users
+ADD CONSTRAINT chk_password_length
+CHECK (LEN(password) >= 6);
