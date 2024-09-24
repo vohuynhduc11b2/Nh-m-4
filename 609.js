@@ -7,7 +7,7 @@ const config = {
     user: 'sa',
     password: '123456789',
     server: 'localhost', 
-    database: 'Users',
+    database: 'UserDB',
     options: {
         encrypt: false, 
         enableArithAbort: true

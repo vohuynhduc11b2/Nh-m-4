@@ -1,23 +1,22 @@
-CREATE DATABASE User
-use User
--- Tạo bảng users để lưu trữ email và mật khẩu của người dùng
-CREATE TABLE users (
-    id INT PRIMARY KEY IDENTITY(1,1),  -- ID tự động tăng
-    email NVARCHAR(255) NOT NULL UNIQUE,  -- Email là duy nhất
-    password NVARCHAR(255) NOT NULL  -- Mật khẩu
+create database UserDB
+use UserDB
+CREATE TABLE [dbo].[Users] (
+    [id] INT IDENTITY(1,1) NOT NULL,   -- Khóa chính tự động tăng
+    [email] VARCHAR(255) NOT NULL,     -- Cột email (độc nhất)
+    [password] VARCHAR(255) NOT NULL,  -- Cột password
+    PRIMARY KEY CLUSTERED ([id] ASC),  -- Thiết lập id là khóa chính
+    UNIQUE NONCLUSTERED ([email] ASC)  -- Thiết lập email là duy nhất
 );
--- Thêm dữ liệu mẫu vào bảng users
-INSERT INTO Users (email, password)
-VALUES 
-('user1@example.com', 'password123'),
-('user2@example.com', 'passw0rd'),
-('user3@example.com', 'rocknroll');
+GO
 
-ALTER TABLE Users
-ADD CONSTRAINT chk_email_format
-CHECK (email LIKE '%@gmail.com');
+-- Thêm ràng buộc CHECK để đảm bảo email có định dạng @gmail.com
+ALTER TABLE [dbo].[Users]
+ADD CONSTRAINT [chk_email_format]
+CHECK ([email] LIKE '%@gmail.com');
+GO
 
-ALTER TABLE Users
-ADD CONSTRAINT chk_password_length
-CHECK (LEN(password) >= 6);
-//sua
+-- Thêm ràng buộc CHECK để đảm bảo độ dài password ít nhất 6 ký tự
+ALTER TABLE [dbo].[Users]
+ADD CONSTRAINT [chk_password_length]
+CHECK (LEN([password]) >= 6);
+GO
