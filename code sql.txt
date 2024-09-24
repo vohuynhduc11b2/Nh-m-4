@@ -20,3 +20,4 @@ CHECK (email LIKE '%@gmail.com');
 ALTER TABLE Users
 ADD CONSTRAINT chk_password_length
 CHECK (LEN(password) >= 6);
+abcd
