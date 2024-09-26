@@ -28,6 +28,10 @@ app.use('/build', express.static(path.join(__dirname, 'build')));
 app.use('/src', express.static(path.join(__dirname, 'src')));
 app.use('/test', express.static(path.join(__dirname, 'test')));
 
+// Serve login.html on logout
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'programs/display/login.html'));
+});
 
 
 
