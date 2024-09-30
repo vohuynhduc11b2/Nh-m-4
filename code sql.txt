@@ -20,3 +20,6 @@ ALTER TABLE [dbo].[Users]
 ADD CONSTRAINT [chk_password_length]
 CHECK (LEN([password]) >= 6);
 GO
+ALTER TABLE [dbo].[Users]
+ADD [last_login_time] DATETIME NULL;  -- Thêm cột để lưu trữ thời gian đăng nhập cuối cùng
+GO
