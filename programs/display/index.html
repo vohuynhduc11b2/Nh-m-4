@@ -15,7 +15,14 @@
 </head>
 <body>
     <div id="main">
-        <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i>
+        <i class="fa fa-bars"></i>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="logout-icon" id="logoutLink">
+                <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Logout
+            </a>
+            
+        </div>
+        
 
         <h1></h1>
 
@@ -180,17 +187,29 @@
         }
        
         window.onload = function() {
-            document.getElementById('file').addEventListener('change', handleFileSelect, false);
-            document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
-            document.getElementById('hide').addEventListener('click', hide, false);
-            document.getElementById('read').addEventListener('click', read, false);
-            document.getElementById('downloadWord').addEventListener('click', exportToWord, false);
-            document.getElementById('text').addEventListener('keyup', updateCapacity, false);
-            document.getElementById('logoutIcon').addEventListener('click', function() {
-            window.location.href = 'login.html'; // Redirect to login.html on logout click
-        });
-            updateCapacity();
-        };
+    document.getElementById('file').addEventListener('change', handleFileSelect, false);
+    document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
+    document.getElementById('hide').addEventListener('click', hide, false);
+    document.getElementById('read').addEventListener('click', read, false);
+    document.getElementById('downloadWord').addEventListener('click', exportToWord, false);
+    document.getElementById('text').addEventListener('keyup', updateCapacity, false);
+    
+    document.querySelector('.fa-bars').addEventListener('click', function() {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
+    });
+    
+    // Add event listener for both icon and text
+    document.getElementById('logoutLink').addEventListener('click', function() {
+        window.location.href = "/login.html";
+    });
+    document.getElementById('logoutIcon').addEventListener('click', function() {
+        window.location.href = "/login.html";
+    });
+
+    updateCapacity();
+};
+
     </script>
 </body>
 </html>
