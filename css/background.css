@@ -26,6 +26,14 @@ body, html {
     color: red;
 }
 
+.fa-user{
+    font-size: 18px;
+    color: #007BFF;
+    padding-right: 10px;
+}
+.fa-user:hover{
+    color: red;
+}
 .dropdown-menu {
     display: none; /* Ẩn menu mặc định */
     position: absolute;
@@ -34,7 +42,7 @@ body, html {
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
-    width: 150px;
+    width: 200px;
     z-index: 1000;
 }
 
