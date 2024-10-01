@@ -20,9 +20,10 @@
             <a href="#" class="logout-icon" id="logoutLink">
                 <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
             </a>
-            <a href="">
+            <a href="account.html" id="accountlink">
                 <i class="fa-solid fa-user"></i>Thông tin tài khoản
             </a>
+            
             
         </div>
         
@@ -189,6 +190,21 @@
             }
         }
        
+        window.onload = function() {
+        const email = localStorage.getItem('email');
+        const lastLoginTime = localStorage.getItem('lastLoginTime');
+
+        // Nếu email và lịch sử đăng nhập có sẵn, hiển thị nó trên trang
+        if (email && lastLoginTime) {
+            document.getElementById('accountlink').addEventListener('click', function() {
+                window.location.href = '/account.html'; // Chuyển đến trang thông tin tài khoản
+            });
+        }
+
+        // Cập nhật thời gian hoạt động cho người dùng trong localStorage
+        const currentTime = new Date().toLocaleString();
+        localStorage.setItem('lastLoginTime', currentTime);
+    };
         window.onload = function() {
     document.getElementById('file').addEventListener('change', handleFileSelect, false);
     document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);

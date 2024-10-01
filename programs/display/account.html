@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin tài khoản</title>
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+       
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main">
+        <h2>Thông tin tài khoản</h2>
+        <div class="info">Email: <span id="userEmail"></span></div>
+        <div class="info">Lịch sử đăng nhập gần nhất: <span id="lastLoginTime"></span></div>
+    </div>
+
+    <script>
+        // Gọi API để lấy thông tin người dùng
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/api/user'); // Đường dẫn API lấy thông tin người dùng
+                const data = await response.json();
+                document.getElementById('userEmail').innerText = data.email;
+                document.getElementById('lastLoginTime').innerText = data.last_login_time;
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                document.getElementById('userEmail').innerText = 'Không thể tải thông tin';
+                document.getElementById('lastLoginTime').innerText = '';
+            }
+        }
+
+        // Gọi hàm để lấy thông tin khi trang được tải
+        window.onload = fetchUserInfo;
+    </script>
+
+</body>
+</html>

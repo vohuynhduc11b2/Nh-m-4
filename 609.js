@@ -2,20 +2,30 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sql = require('mssql');
 const path = require('path');
-
+const session = require('express-session');
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
+// Thiết lập middleware cho session
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set true if using HTTPS
+}));
 const config = {
     user: 'sa',
     password: '123456789',
     server: 'localhost', 
-    database: 'UserDC',
+    database: 'UserDB',
     options: {
         encrypt: false, 
         enableArithAbort: true
     }
 };
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
+app.get('/account.html', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'programs/display/account.html'));
+});
 
 // Hàm lấy thời gian hiện tại theo múi giờ của hệ thống và định dạng theo "YYYY-MM-DD HH:mm:ss.SSS"
 function getCurrentDateTime() {
@@ -30,6 +40,28 @@ function getCurrentDateTime() {
     
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
+// Thêm một route để lấy thông tin người dùng
+app.get('/api/user', async (req, res) => {
+    const email = req.session.email; // Lấy email từ session
+
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+        request.input('email', sql.VarChar, email);
+        
+        const result = await request.query('SELECT email, last_login_time FROM Users WHERE email = @email');
+
+        if (result.recordset.length > 0) {
+            res.json(result.recordset[0]); // Trả về thông tin người dùng
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        console.error('Database query error:', err);
+        res.status(500).send('Server error');
+    }
+});
+
 
 // Route để hiển thị trang đăng nhập
 app.get('/', (req, res) => {
@@ -62,8 +94,11 @@ app.post('/login', async (req, res) => {
         const result = await request.query('SELECT * FROM Users WHERE email = @email AND password = @password');
         
         if (result.recordset.length > 0) {
-            // Đăng nhập thành công, lấy thời gian hiện tại
-            const currentTime = getCurrentDateTime(); // Lấy thời gian hiện tại theo định dạng đúng
+            // Đăng nhập thành công, lưu email vào session
+            req.session.email = email;
+
+            // Lấy thời gian hiện tại
+            const currentTime = getCurrentDateTime(); 
 
             // Cập nhật thời gian hoạt động cho người dùng
             const updateRequest = new sql.Request();
@@ -81,7 +116,6 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 // Khởi chạy server
 const port = process.env.PORT || 6009;
 app.listen(port, () => {
