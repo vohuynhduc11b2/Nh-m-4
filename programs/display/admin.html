@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/all.min.css">
+    <script src="/build/all.min.js"></script>
+    <title>Admin Dashboard</title>
+    <style>
+      
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="main">
+        <i class="fa fa-bars"></i>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" id="IndexLink">
+                <i class="fa-solid fa-house"></i>Trang chủ
+            </a>
+            <a href="#" class="logout-icon" id="logoutLink">
+                <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
+            </a>
+           
+            
+            
+        </div>
+    <h3>Danh sách người dùng</h3>
+    <table id="usersTable">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Mật khẩu</th>
+                <th>Lần đăng nhập cuối</th>
+                <th>Vai trò</th>
+                <th>Chức năng</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu người dùng sẽ được thêm vào đây -->
+        </tbody>
+    </table>
+
+    <h3>Thêm người dùng</h3>
+    <form id="addUserForm">
+        <label for="newEmail">Email:</label>
+        <input type="email" id="newEmail" required>
+        <label for="newPassword">Mật khẩu:</label>
+        <input type="password" id="newPassword" required>
+        <label for="newRole">Vai trò:</label>
+        <select id="newRole">
+            <option value="user">user</option>
+            <option value="admin">admin</option>
+        </select>
+        <input type="submit" value="Thêm">
+    </form>
+</div>
+    <script>
+        document.getElementById('addUserForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newRole').value;
+
+            console.log({ email, password, role }); // Log thông tin gửi đi
+
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, role }),
+            });
+
+            if (response.ok) {
+                alert('User added successfully!');
+                location.reload(); // Reload the page to show the updated user list
+            } else {
+                const errorText = await response.text();
+                alert('Failed to add user: ' + errorText);
+            }
+        });
+
+        async function loadUsers() {
+            const response = await fetch('/api/users');
+            const users = await response.json();
+
+            const usersTableBody = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+            users.forEach(user => {
+                const row = usersTableBody.insertRow();
+                row.insertCell(0).innerText = user.email;
+                row.insertCell(1).innerText = user.password; // Show password only for demo purposes
+                row.insertCell(2).innerText = user.last_login_time || 'N/A';
+                row.insertCell(3).innerText = user.role;
+                const actionsCell = row.insertCell(4);
+                actionsCell.innerHTML = 
+                    `<button onclick="deleteUser('${user.email}')">Delete</button>
+                     <button onclick="showUpdateUserForm('${user.email}', '${user.password}', '${user.role}')">Update</button>`;
+            });
+        }
+
+        async function deleteUser(email) {
+            const response = await fetch(`/api/users/${email}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('User deleted successfully!');
+                location.reload(); // Reload the page to show the updated user list
+            } else {
+                alert('Failed to delete user.');
+            }
+        }
+
+        function showUpdateUserForm(email, password, role) {
+            const newEmail = prompt('Enter new email:', email);
+            const newPassword = prompt('Enter new password:', password);
+            const newRole = prompt('Enter new role (admin/user):', role);
+
+            if (newEmail && newPassword && (newRole === 'admin' || newRole === 'user')) {
+                updateUser(newEmail, newPassword, newRole, email);
+            } else {
+                alert('Invalid inputs.');
+            }
+        }
+
+        async function updateUser(newEmail, newPassword, newRole, oldEmail) {
+            const response = await fetch(`/api/users/${oldEmail}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: newEmail, password: newPassword, role: newRole }),
+            });
+
+            if (response.ok) {
+                alert('User updated successfully!');
+                location.reload(); // Reload the page to show the updated user list
+            } else {
+                alert('Failed to update user.');
+            }
+        }
+
+        loadUsers(); // Load users when the page loads
+        window.onload = function() {
+   
+    document.querySelector('.fa-bars').addEventListener('click', function() {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
+    });
+    
+    // Add event listener for both icon and text
+    document.getElementById('logoutLink').addEventListener('click', function() {
+        window.location.href = "/login.html";
+    });
+    document.getElementById('IndexLink').addEventListener('click', function() {
+        window.location.href = "/index.html";
+    });
+ 
+
+   
+};
+    </script>
+</body>
+</html>

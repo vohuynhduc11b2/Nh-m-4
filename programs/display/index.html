@@ -10,7 +10,8 @@
     <script src="/build/mammoth.browser.min.js"></script>
     <script src="/build/exportword.js"></script> <!-- Thư viện docx -->
    <link rel="stylesheet" href="/css/background.css">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+   <link rel="stylesheet" href="/css/all.min.css">
+   <script src="/build/all.min.js"></script>
 
 </head>
 <body>
@@ -20,9 +21,7 @@
             <a href="#" class="logout-icon" id="logoutLink">
                 <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
             </a>
-            <a href="account.html" id="accountlink">
-                <i class="fa-solid fa-user"></i>Thông tin tài khoản
-            </a>
+           
             
             
         </div>
@@ -190,21 +189,7 @@
             }
         }
        
-        window.onload = function() {
-        const email = localStorage.getItem('email');
-        const lastLoginTime = localStorage.getItem('lastLoginTime');
-
-        // Nếu email và lịch sử đăng nhập có sẵn, hiển thị nó trên trang
-        if (email && lastLoginTime) {
-            document.getElementById('accountlink').addEventListener('click', function() {
-                window.location.href = '/account.html'; // Chuyển đến trang thông tin tài khoản
-            });
-        }
-
-        // Cập nhật thời gian hoạt động cho người dùng trong localStorage
-        const currentTime = new Date().toLocaleString();
-        localStorage.setItem('lastLoginTime', currentTime);
-    };
+       
         window.onload = function() {
     document.getElementById('file').addEventListener('change', handleFileSelect, false);
     document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
@@ -222,9 +207,7 @@
     document.getElementById('logoutLink').addEventListener('click', function() {
         window.location.href = "/login.html";
     });
-    document.getElementById('logoutIcon').addEventListener('click', function() {
-        window.location.href = "/login.html";
-    });
+  
 
     updateCapacity();
 };

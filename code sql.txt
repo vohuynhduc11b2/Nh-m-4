@@ -23,3 +23,6 @@ GO
 ALTER TABLE [dbo].[Users]
 ADD [last_login_time] DATETIME NULL;  -- Thêm cột để lưu trữ thời gian đăng nhập cuối cùng
 GO
+ALTER TABLE [dbo].[Users]
+ADD [role] VARCHAR(10) NOT NULL DEFAULT 'user';  -- Mặc định là 'user'
+GO
