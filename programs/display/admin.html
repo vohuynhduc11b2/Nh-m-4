@@ -1,180 +1,485 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/background.css">
-    <link rel="stylesheet" href="/css/all.min.css">
-    <script src="/build/all.min.js"></script>
-    <title>Admin Dashboard</title>
+    <title>Quản Lý Người Dùng</title>
     <style>
-      
+    body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e9f1f7;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+        .form-container, .list-container {
+            flex: 1;
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .list-container {
+            width: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .list-container table {
+            font-size: 14px;
+        }
+        .list-container th, .list-container td {
+            padding: 10px;
+        }
+        .form-container:hover, .list-container:hover {
+            transform: translateY(-5px);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
         }
         th, td {
-            padding: 10px;
+            padding: 15px;
             text-align: left;
-            border: 1px solid #ccc;
+            border-bottom: 1px solid #f1f1f1;
         }
         th {
-            background-color: #007BFF;
+            background-color: #4a90e2;
             color: white;
+            font-weight: bold;
         }
+        tr:hover {
+            background-color: #f0f8ff;
+        }
+        input[type="text"], input[type="email"], input[type="password"], select {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus {
+            border-color: #4a90e2;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #3b79c6;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .search-btn {
+            background-color: #4a90e2;
+           color: white;
+          border: none;
+             padding: 10px 15px;
+           border-radius: 6px;
+            cursor: pointer;
+           transition: background-color 0.3s ease;
+            margin-left: 5px; /* Thêm khoảng cách nhỏ giữa các nút */
+            } 
+
+.search-btn:hover {
+    background-color: #3b79c6;
+}
+
+
+      .reset{
+        background-color: red;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .reset:hover{
+        background-color: rgb(129, 36, 36);
+
+
+      }
+        .center {
+            text-align: center;
+        }
+        hr {
+            border: 1px solid #4a90e2;
+            margin-top: 20px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .search-container input[type="submit"] {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .search-container input[type="submit"]:hover {
+            background-color: #3b79c6;
+        }
+      
     </style>
 </head>
 <body>
-    
-    <div id="main">
-        <i class="fa fa-bars"></i>
-        <div class="dropdown-menu" id="dropdownMenu">
-            <a href="#" id="IndexLink">
-                <i class="fa-solid fa-house"></i>Trang chủ
-            </a>
-            <a href="#" class="logout-icon" id="logoutLink">
-                <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
-            </a>
-           
-            
-            
+    <h1>Quản Lý Người Dùng</h1>
+
+    <div class="container">
+        <div class="form-container">
+            <form id="form1" method="post">
+                <table>
+                    <tbody>
+                        <!-- Form thông tin người dùng -->
+                        <tr>
+                            <th colspan="2">Thông Tin Người Dùng</th>
+                        </tr>
+                        <tr>
+                            <th align="left">ID người dùng</th>
+                            <td><input type="text" name="txtIDUser" id="txtIDUser"></td>
+                        </tr>
+                        <tr>
+                            <th align="left">Tên người dùng</th>
+                            <td><input type="text" name="txtTenUser" id="txtTenUser" required></td>
+                        </tr>
+                        <tr>
+                            <th align="left">Số điện thoại</th>
+                            <td><input type="text" name="txtSDT" id="txtSDT" required></td>
+                        </tr>
+                        <tr>
+                            <th align="left">Email</th>
+                            <td><input type="email" name="txtEmail" id="txtEmail" required></td>
+                        </tr>
+                        <tr>
+                            <th align="left">Mật khẩu</th>
+                            <td><input type="password" name="txtPass" id="txtPass" required></td>
+                        </tr>
+                        <tr>
+                            <th align="left">Vai trò</th>
+                            <td>
+                                <select name="txtVaiTro" id="txtVaiTro">
+                                    <option value="admin">Admin</option>
+                                    <option value="user" selected>User</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th align="left">Quyền truy cập</th>
+                            <td>
+                                <input type="checkbox" name="quyen[]" value="Nhung" id="quyen_nhung"> Nhúng văn bản<br>
+                                <input type="checkbox" name="quyen[]" value="Tach" id="quyen_tach"> Tách văn bản<br>
+                                <input type="checkbox" name="quyen[]" value="Xemthongtin" id="quyen_xem_bao_mat"> Xem thông tin bảo mật
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="center">
+                                <input type="submit" name="nut" value="Thêm người dùng" onclick="addUser(); return false;">
+                                <input type="submit" name="nut" value="Sửa người dùng" onclick="updateUser(); return false;">
+                                <input type="submit" name="nut" value="Xóa người dùng" onclick="deleteUser(); return false;">
+                                <input type="button" class="reset" value="Reset" onclick="clearForm();"> <!-- Thêm nút Reset -->
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <hr>
+            </form>
         </div>
-    <h3>Danh sách người dùng</h3>
-    <table id="usersTable">
-        <thead>
-            <tr>
-                <th>Email</th>
-                <th>Mật khẩu</th>
-                <th>Lần đăng nhập cuối</th>
-                <th>Vai trò</th>
-                <th>Chức năng</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Dữ liệu người dùng sẽ được thêm vào đây -->
-        </tbody>
-    </table>
 
-    <h3>Thêm người dùng</h3>
-    <form id="addUserForm">
-        <label for="newEmail">Email:</label>
-        <input type="email" id="newEmail" required>
-        <label for="newPassword">Mật khẩu:</label>
-        <input type="password" id="newPassword" required>
-        <label for="newRole">Vai trò:</label>
-        <select id="newRole">
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-        </select>
-        <input type="submit" value="Thêm">
-    </form>
-</div>
+        <div class="list-container">
+            <!-- Form tìm kiếm người dùng -->
+            <div class="search-container">
+                <form id="searchForm" onsubmit="searchUser(); return false;">
+                    <input type="text" id="searchIDUser" placeholder="Nhập ID người dùng để tìm kiếm" required>
+                    <input type="submit" value="Tìm kiếm"  class="search-btn">
+                    <input type="button" value="Hiển thị toàn bộ"  class="search-btn" onclick="loadUserList();">
+
+                </form>
+            </div>
+            <!-- Bảng danh sách người dùng -->
+            <h2>Danh Sách Người Dùng</h2>
+            <table id="userList">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên người dùng</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Vai trò</th>
+                        <th>Quyền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+           
+        </div>
+        <div class="center">
+            <input style="position: absolute; margin-top: 550px; left: 1100px;" type="submit" value="Đăng xuất" onclick="window.location.href='/login.html';">
+        </div>
+      
+    </div>
+
     <script>
-        document.getElementById('addUserForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const email = document.getElementById('newEmail').value;
-            const password = document.getElementById('newPassword').value;
-            const role = document.getElementById('newRole').value;
+       document.getElementById('txtVaiTro').addEventListener('change', function() {
+            const isUser = this.value === 'user';
+            const quyenXemBaoMat = document.getElementById('quyen_xem_bao_mat');
+            const quyenNhung = document.getElementById('quyen_nhung');
+            const quyenTach = document.getElementById('quyen_tach');
 
-            console.log({ email, password, role }); // Log thông tin gửi đi
-
-            const response = await fetch('/api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password, role }),
-            });
-
-            if (response.ok) {
-                alert('User added successfully!');
-                location.reload(); // Reload the page to show the updated user list
+            if (isUser) {
+                quyenXemBaoMat.checked = false;
+                quyenXemBaoMat.disabled = true;
+                quyenNhung.checked = true;
+                quyenTach.check = true;
             } else {
-                const errorText = await response.text();
-                alert('Failed to add user: ' + errorText);
+                quyenXemBaoMat.checked = true;
+                quyenXemBaoMat.disabled = false;
+                quyenNhung.checked = true;
+                quyenTach.checked = true;
             }
         });
 
-        async function loadUsers() {
-            const response = await fetch('/api/users');
-            const users = await response.json();
-
-            const usersTableBody = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
-            users.forEach(user => {
-                const row = usersTableBody.insertRow();
-                row.insertCell(0).innerText = user.email;
-                row.insertCell(1).innerText = user.password; // Show password only for demo purposes
-                row.insertCell(2).innerText = user.last_login_time || 'N/A';
-                row.insertCell(3).innerText = user.role;
-                const actionsCell = row.insertCell(4);
-                actionsCell.innerHTML = 
-                    `<button onclick="deleteUser('${user.email}')">Delete</button>
-                     <button onclick="showUpdateUserForm('${user.email}', '${user.password}', '${user.role}')">Update</button>`;
-            });
-        }
-
-        async function deleteUser(email) {
-            const response = await fetch(`/api/users/${email}`, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
-                alert('User deleted successfully!');
-                location.reload(); // Reload the page to show the updated user list
-            } else {
-                alert('Failed to delete user.');
-            }
-        }
-
-        function showUpdateUserForm(email, password, role) {
-            const newEmail = prompt('Enter new email:', email);
-            const newPassword = prompt('Enter new password:', password);
-            const newRole = prompt('Enter new role (admin/user):', role);
-
-            if (newEmail && newPassword && (newRole === 'admin' || newRole === 'user')) {
-                updateUser(newEmail, newPassword, newRole, email);
-            } else {
-                alert('Invalid inputs.');
-            }
-        }
-
-        async function updateUser(newEmail, newPassword, newRole, oldEmail) {
-            const response = await fetch(`/api/users/${oldEmail}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: newEmail, password: newPassword, role: newRole }),
-            });
-
-            if (response.ok) {
-                alert('User updated successfully!');
-                location.reload(); // Reload the page to show the updated user list
-            } else {
-                alert('Failed to update user.');
-            }
-        }
-
-        loadUsers(); // Load users when the page loads
         window.onload = function() {
-   
-    document.querySelector('.fa-bars').addEventListener('click', function() {
-        var dropdownMenu = document.getElementById('dropdownMenu');
-        dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
-    });
-    
-    // Add event listener for both icon and text
-    document.getElementById('logoutLink').addEventListener('click', function() {
-        window.location.href = "/login.html";
-    });
-    document.getElementById('IndexLink').addEventListener('click', function() {
-        window.location.href = "/index.html";
-    });
- 
+            document.getElementById('txtVaiTro').dispatchEvent(new Event('change'));
+            loadUserList();
+        };
+        function clearForm() {
+    document.getElementById('txtIDUser').value = '';
+    document.getElementById('txtTenUser').value = '';
+    document.getElementById('txtSDT').value = '';
+    document.getElementById('txtEmail').value = '';
+    document.getElementById('txtPass').value = '';
+    document.getElementById('txtVaiTro').value = 'user';
+    document.getElementById('quyen_nhung').checked = false;
+    document.getElementById('quyen_tach').checked = false;
+    document.getElementById('quyen_xem_bao_mat').checked = false;
+}
 
-   
-};
+
+        async function loadUserList() {
+            try {
+                const response = await fetch('/api/users/list');
+                const users = await response.json();
+                
+                const userList = document.getElementById('userList').getElementsByTagName('tbody')[0];
+                userList.innerHTML = '';
+
+                users.forEach(user => addUserRow(userList, user));
+            } catch (error) {
+                console.error('Error loading user list:', error);
+            }
+        }
+
+        async function searchUser() {
+            const id = document.getElementById('searchIDUser').value;
+
+            try {
+                const response = await fetch(`/api/users/search/${id}`);
+                const user = await response.json();
+
+                const userList = document.getElementById('userList').getElementsByTagName('tbody')[0];
+                userList.innerHTML = '';
+
+                addUserRow(userList, user);  // Thêm người dùng vào bảng và gắn sự kiện click
+            } catch (error) {
+                alert('Người dùng không tồn tại hoặc có lỗi xảy ra.');
+                console.error('Search error:', error);
+            }
+        }
+
+        function addUserRow(userList, user) {
+            const row = document.createElement('tr');
+            row.addEventListener('click', () => fillFormWithUser(user));
+
+            const idCell = document.createElement('td');
+            idCell.textContent = user.IDUser;
+            const nameCell = document.createElement('td');
+            nameCell.textContent = user.Ten;
+            const sdtCell = document.createElement('td');
+            sdtCell.textContent = user.SDT;
+            const emailCell = document.createElement('td');
+            emailCell.textContent = user.email;
+            const passwordCell = document.createElement('td');
+            passwordCell.textContent = user.pass;
+            const roleCell = document.createElement('td');
+            roleCell.textContent = user.Vaitro;
+            const quyenCell = document.createElement('td');
+            quyenCell.textContent = user.Quyen;
+
+            row.appendChild(idCell);
+            row.appendChild(nameCell);
+            row.appendChild(sdtCell);
+            row.appendChild(emailCell);
+            row.appendChild(passwordCell);
+            row.appendChild(roleCell);
+            row.appendChild(quyenCell);
+
+            userList.appendChild(row);
+        }
+
+        function fillFormWithUser(user) {
+            document.getElementById('txtIDUser').value = user.IDUser;
+            document.getElementById('txtTenUser').value = user.Ten;
+            document.getElementById('txtSDT').value = user.SDT;
+            document.getElementById('txtEmail').value = user.email;
+            document.getElementById('txtPass').value = user.pass;
+            document.getElementById('txtVaiTro').value = user.Vaitro;
+
+            const quyenArray = user.Quyen ? user.Quyen.split(',') : [];
+            document.getElementById('quyen_nhung').checked = quyenArray.includes('Nhung');
+            document.getElementById('quyen_tach').checked = quyenArray.includes('Tach');
+            document.getElementById('quyen_xem_bao_mat').checked = quyenArray.includes('Xemthongtin');
+        }
+        async function addUser() {
+            const txtSDT = document.getElementById('txtSDT').value;
+    const txtEmail = document.getElementById('txtEmail').value;
+
+    // Validate phone number
+    if (txtSDT.length !== 10 || isNaN(txtSDT)) {
+        alert("Số điện thoại phải là 10 chữ số.");
+        return;
+    }
+
+    // Validate email
+    if (!txtEmail.includes('@')) {
+        alert("Email phải chứa ký tự '@'.");
+        return;
+    }
+
+    const txtIDUser = document.getElementById('txtIDUser').value;
+    const txtTenUser = document.getElementById('txtTenUser').value;
+    const txtPass = document.getElementById('txtPass').value;
+    const txtVaiTro = document.getElementById('txtVaiTro').value;
+
+            const quyen = [];
+            if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
+            if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
+            if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
+
+            try {
+                const response = await fetch('/api/users/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
+                });
+
+                const result = await response.text();
+                alert(result);
+                if (response.ok)
+                { 
+                    loadUserList();
+                     clearForm();
+                }
+                else console.error('Error adding user:', result);
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        async function updateUser() {
+
+            const txtSDT = document.getElementById('txtSDT').value;
+    const txtEmail = document.getElementById('txtEmail').value;
+
+    // Validate phone number
+    if (txtSDT.length !== 10 || isNaN(txtSDT)) {
+        alert("Số điện thoại phải là 10 chữ số.");
+        return;
+    }
+
+    // Validate email
+    if (!txtEmail.includes('@')) {
+        alert("Email phải chứa ký tự '@'.");
+        return;
+    }
+            
+            const txtIDUser = document.getElementById('txtIDUser').value;
+            const txtTenUser = document.getElementById('txtTenUser').value;
+            const txtPass = document.getElementById('txtPass').value;
+            const txtVaiTro = document.getElementById('txtVaiTro').value;
+            const quyen = [];
+            if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
+            if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
+            if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
+
+            try {
+                const response = await fetch('/api/users/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
+                });
+
+                const result = await response.text();
+                alert(result);
+                if (response.ok)
+                { 
+                    loadUserList();
+                     clearForm();
+                }
+                else console.error('Error updating user:', result);
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        async function deleteUser() {
+            const txtIDUser = document.getElementById('txtIDUser').value;
+
+            try {
+                const response = await fetch('/api/users/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txtIDUser })
+                });
+
+                const result = await response.text();
+                alert(result);
+                if (response.ok)
+                { 
+                    loadUserList();
+                     clearForm();
+                }
+                else console.error('Error deleting user:', result);
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
     </script>
 </body>
 </html>

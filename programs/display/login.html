@@ -35,7 +35,7 @@
             font-weight: bold;
         }
 
-        input[type="email"], input[type="password"] {
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -56,32 +56,53 @@
         }
 
         input[type="submit"]:hover {
-            background-color:  #007BFF;
+            background-color: #0056b3;
         }
-
-        
-
     </style>
     <script>
         function validateForm() {
-            const email = document.getElementById('email').value;
+            const idUser = document.getElementById('idUser').value;
             const password = document.getElementById('password').value;
 
-            // Regular expression to validate the email ending with "@gmail.com"
-            const emailPattern = /^[a-zA-Z0-9._-]+@gmail\.com$/;
-
-            if (!emailPattern.test(email)) {
-                alert('Email phải đúng định dạng example@gmail.com');
+            if (idUser.length !== 6) {
+                alert('IDUser phải gồm 6 ký tự.');
                 return false;
             }
 
-            // Check if the password is at least 6 characters long
             if (password.length < 6) {
-                alert('Mật khẩu phải ít nhất 6 ký tự');
+                alert('Mật khẩu phải ít nhất 6 ký tự.');
                 return false;
             }
 
-            return true; // Allow form submission if validations pass
+            return true;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault(); // Ngăn không cho trang reload
+
+            const idUser = document.getElementById('idUser').value;
+            const password = document.getElementById('password').value;
+
+            // Gửi yêu cầu AJAX
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ idUser, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect; // Chuyển hướng nếu đăng nhập thành công
+                } else {
+                    alert(data.message); // Hiển thị thông báo nếu đăng nhập thất bại
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+            });
         }
     </script>
 </head>
@@ -89,14 +110,14 @@
 
     <div class="login-container">
         <h2>Đăng nhập</h2>
-        <form action="/login" method="post" onsubmit="return validateForm()">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <label for="idUser">ID:</label>
+            <input type="text" id="idUser" name="idUser" required>
+        
             <label for="password">Mật khẩu:</label>
             <input type="password" id="password" name="password" required>
-
-            <input type="submit" value="Login">
+        
+            <input type="submit" value="Đăng nhập">
         </form>
     </div>
 

@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
     <title>Nhóm 4</title>
- 
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="http://www.peter-eigenschink.at/blog/favicon.ico" type="image/x-icon" rel="shortcut icon">
     <script src="/build/mammoth.browser.min.js"></script>
     <script src="/build/exportword.js"></script> <!-- Thư viện docx -->
-   <link rel="stylesheet" href="/css/background.css">
-   <link rel="stylesheet" href="/css/all.min.css">
-   <script src="/build/all.min.js"></script>
-
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/all.min.css">
+    <script src="/build/all.min.js"></script>
 </head>
 <body>
     <div id="main">
@@ -21,11 +19,7 @@
             <a href="#" class="logout-icon" id="logoutLink">
                 <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
             </a>
-           
-            
-            
         </div>
-        
 
         <h1></h1>
 
@@ -34,10 +28,10 @@
             <input id="file" type="file" accept=".png,.jpg" />
             <h2>Văn bản:</h2>
             <input type="file" id="textFile" accept=".txt,.docx" />
-            <textarea id="text"></textarea>
+            <textarea id="text" maxlength="1000"></textarea> <!-- Giới hạn 1000 ký tự -->
             <div class="btns">
                 <button id="hide" class="btn btn-outline-primary btn-lg btn-block">Nhúng</button>
-                 <button id="read" class="btn btn-outline-primary btn-lg btn-block">Đọc</button>
+                <button id="read" class="btn btn-outline-primary btn-lg btn-block">Đọc</button>
             </div>
         </div>
 
@@ -50,7 +44,7 @@
                 <div class="image-container">
                     <h2>Ảnh nhúng:</h2>
                     <img id="cover" src="" />
-                    <a id="download" download="anh.png">Tải xuống</a> <!-- Nút tải xuống sẽ được hiển thị sau khi nhúng -->
+                    <a id="download" download="anh.png">Tải xuống</a>
                     <div class="note"></div>
                 </div>
             </div>
@@ -58,7 +52,6 @@
                 <h2>Mã:</h2>
                 <div id="message"></div>
             </div>
-            <!-- Nút tải file Word -->
             <button id="downloadWord" style="display:none;" class="btn">Tải về Word</button>
         </div>
 
@@ -87,7 +80,7 @@
                         cover.src = "";
                         message.innerHTML = "";
                         message.parentNode.classList.add("invisible");
-                        updateCapacity();
+                        UpdateLimit();
                     };
                 })(f);
                 reader.readAsDataURL(f);
@@ -101,8 +94,9 @@
             if (file && file.name.endsWith('.txt')) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    textarea.value = e.target.result;
-                    updateCapacity();
+                    var textContent = e.target.result;
+                    textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
+                    UpdateLimit();
                 };
                 reader.readAsText(file);
             } else if (file && file.name.endsWith('.docx')) {
@@ -110,17 +104,17 @@
                 reader.onload = function(e) {
                     mammoth.extractRawText({ arrayBuffer: e.target.result })
                         .then(function(result) {
-                            textarea.value = result.value; // Kết quả là nội dung văn bản
-                            updateCapacity();
+                            var textContent = result.value; // Kết quả là nội dung văn bản
+                            textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
+                            UpdateLimit();
                         })
                         .catch(function(err) {
                             console.error("Error reading DOCX file: ", err);
                         });
                 };
-                reader.readAsArrayBuffer(file); // DOCX yêu cầu ArrayBuffer
+                reader.readAsArrayBuffer(file);
             }
         }
-        
 
         function hide() {
             var img = document.getElementById("img");
@@ -145,8 +139,8 @@
                 message.innerHTML = steg.decode(img);
                 if (message.innerHTML !== "") {
                     message.parentNode.classList.remove("invisible");
-                    textarea.value = message.innerHTML;
-                    updateCapacity();
+                    textarea.value = message.innerHTML.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
+                    UpdateLimit();
                     downloadWord.style.display = "inline-block"; // Hiển thị nút tải về Word khi đọc xong
                 } else {
                     message.parentNode.classList.add("invisible");
@@ -155,14 +149,11 @@
             }
         }
 
-        function updateCapacity() {
-            var textarea = document.getElementById('text');
-            var img = document.getElementById('img');
-            var note = document.querySelector(".note");
-            if (textarea && img) {
-                note.innerHTML = steg.getHidingCapacity(img) + " characters available";
-            }
-        }
+        function UpdateLimit() {
+    var note = document.querySelector(".note");
+    note.innerHTML = "Bạn có thể nhúng tối đa 1000 ký tự.";
+}
+
 
         function exportToWord() {
             var messageText = document.getElementById("message").innerText;
@@ -183,35 +174,32 @@
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = 'hidden_message.docx';
+                    link.download = 'Nội dung ẩn.docx';
                     link.click();
                 });
             }
         }
-       
-       
+
         window.onload = function() {
-    document.getElementById('file').addEventListener('change', handleFileSelect, false);
-    document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
-    document.getElementById('hide').addEventListener('click', hide, false);
-    document.getElementById('read').addEventListener('click', read, false);
-    document.getElementById('downloadWord').addEventListener('click', exportToWord, false);
-    document.getElementById('text').addEventListener('keyup', updateCapacity, false);
-    
-    document.querySelector('.fa-bars').addEventListener('click', function() {
-        var dropdownMenu = document.getElementById('dropdownMenu');
-        dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
-    });
-    
-    // Add event listener for both icon and text
-    document.getElementById('logoutLink').addEventListener('click', function() {
-        window.location.href = "/login.html";
-    });
-  
+            document.getElementById('file').addEventListener('change', handleFileSelect, false);
+            document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
+            document.getElementById('hide').addEventListener('click', hide, false);
+            document.getElementById('read').addEventListener('click', read, false);
+            document.getElementById('downloadWord').addEventListener('click', exportToWord, false);
+            document.getElementById('text').addEventListener('keyup', UpdateLimit, false);
+            
+            document.querySelector('.fa-bars').addEventListener('click', function() {
+                var dropdownMenu = document.getElementById('dropdownMenu');
+                dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
+            });
+            
+            // Add event listener for both icon and text
+            document.getElementById('logoutLink').addEventListener('click', function() {
+                window.location.href = "/login.html";
+            });
 
-    updateCapacity();
-};
-
+            UpdateLimit();
+        };
     </script>
 </body>
 </html>

@@ -6,7 +6,7 @@ const session = require('express-session');
 
 const app = express(); // Khởi tạo ứng dụng express
 
-app.use(bodyParser.json()); 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Thiết lập middleware cho session
@@ -17,14 +17,13 @@ app.use(session({
     cookie: { secure: false } // Set true if using HTTPS
 }));
 
-
 const config = {
     user: 'sa',
     password: '123456789',
-    server: 'localhost', 
-    database: 'UserDD',
+    server: 'localhost',
+    database: 'nhom4', // Đảm bảo tên database chính xác
     options: {
-        encrypt: false, 
+        encrypt: false,
         enableArithAbort: true
     }
 };
@@ -39,20 +38,16 @@ function getCurrentDateTime() {
     const minutes = String(currentDate.getMinutes()).padStart(2, '0');
     const seconds = String(currentDate.getSeconds()).padStart(2, '0');
     const milliseconds = String(currentDate.getMilliseconds()).padStart(3, '0');
-    
+
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
-app.get('/index.html', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'programs/display/index.html'));
-});
-// Serve login.html on logout
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'programs/display/login.html'));
-});
+
 // Route để hiển thị trang đăng nhập
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'programs/display/login.html'));
 });
+
+
 
 // Route để hiển thị trang admin
 app.get('/admin.html', (req, res) => {
@@ -64,156 +59,219 @@ app.get('/admin.html', (req, res) => {
 });
 
 
+app.get('/index.html', (req, res) => {
+    if (req.session.role === 'user') {
+        res.sendFile(path.resolve(__dirname, 'programs/display/index.html'));
+    } else {
+        res.status(403).send('Access denied.');
+    }
+});
+
+
 // Xử lý POST từ form đăng nhập
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { idUser, password } = req.body;
 
     try {
         await sql.connect(config);
         const request = new sql.Request();
-        request.input('email', sql.VarChar, email);
+        request.input('idUser', sql.Char(6), idUser);
         request.input('password', sql.VarChar, password);
 
-        const result = await request.query('SELECT * FROM Users WHERE email = @email AND password = @password');
-        
-        if (result.recordset.length > 0) {
-            req.session.email = email;
-            req.session.role = result.recordset[0].role;
+        const result = await request.query('SELECT * FROM [Users] WHERE IDUser = @idUser AND pass = @password');
 
-            const currentTime = getCurrentDateTime(); 
-            const updateRequest = new sql.Request();
-            updateRequest.input('email', sql.VarChar, email);
-            updateRequest.input('last_login_time', sql.VarChar, currentTime);
-            await updateRequest.query('UPDATE Users SET last_login_time = @last_login_time WHERE email = @email');
-            
+        if (result.recordset.length > 0) {
+            req.session.idUser = idUser;
+            req.session.role = result.recordset[0].Vaitro;
+
             if (req.session.role === 'admin') {
-                res.sendFile(path.resolve(__dirname, 'programs/display/admin.html'));
+                res.json({ success: true, redirect: '/admin.html' });
+            } else if (req.session.role === 'user') {
+                res.json({ success: true, redirect: '/index.html' });
             } else {
-                res.sendFile(path.resolve(__dirname, 'programs/display/index.html'));
+                res.json({ success: false, message: 'Access denied: Your role is not authorized.' });
             }
         } else {
-            res.send('<h1>Login failed</h1><p>Invalid email or password.</p>');
+            res.json({ success: false, message: 'Đăng nhập không thành công: ID hoặc mật khẩu không hợp lệ.' });
         }
     } catch (err) {
         console.error('Database query error:', err);
-        res.status(500).send('Server error');
-    }
-});
-
-// Route để lấy thông tin người dùng
-app.get('/api/user', async (req, res) => {
-    const email = req.session.email;
-
-    try {
-        await sql.connect(config);
-        const request = new sql.Request();
-        request.input('email', sql.VarChar, email);
-        
-        const result = await request.query('SELECT email, last_login_time FROM Users WHERE email = @email');
-
-        if (result.recordset.length > 0) {
-            res.json(result.recordset[0]);
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
-    } catch (err) {
-        console.error('Database query error:', err);
-        res.status(500).send('Server error');
-    }
-});
-
-// Route để lấy danh sách người dùng
-app.get('/api/users', async (req, res) => {
-    try {
-        await sql.connect(config);
-        const result = await sql.query('SELECT email, password, last_login_time, role FROM Users');
-        res.json(result.recordset);
-    } catch (err) {
-        console.error('Database query error:', err);
-        res.status(500).send('Server error');
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
 // Route để thêm người dùng
-app.post('/api/users', async (req, res) => {
-    const { email, password, role } = req.body;
-    
-    // Kiểm tra các trường bắt buộc
-    if (!email || !password || !role) {
-        return res.status(400).send('Missing required fields');
-    }
-    if (!email.endsWith('@gmail.com')) {
-        return res.status(400).send('Email must end with @gmail.com');
-    }
-
-    // Kiểm tra độ dài mật khẩu
-    if (password.length < 6) {
-        return res.status(400).send('Password must be at least 6 characters long');
-    }
+// Route to add a user
+app.post('/api/users/add', async (req, res) => {
+    const { txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen } = req.body;
 
     try {
         await sql.connect(config);
         const request = new sql.Request();
-        request.input('email', sql.VarChar, email);
-        request.input('password', sql.VarChar, password);
-        request.input('role', sql.VarChar, role);
 
-        await request.query('INSERT INTO Users (email, password, role) VALUES (@email, @password, @role)');
-        res.status(201).send('User added successfully');
+        // Check if the ID already exists
+        request.input('IDUser', sql.Char(6), txtIDUser);
+        const checkIDResult = await request.query('SELECT * FROM [Users] WHERE IDUser = @IDUser');
+        if (checkIDResult.recordset.length > 0) {
+            res.status(400).send('ID người dùng đã tồn tại trong hệ thống.');
+            return;
+        }
+
+        // Check if the email already exists
+        request.input('email', sql.VarChar(255), txtEmail);
+        const checkEmailResult = await request.query('SELECT * FROM [Users] WHERE email = @email');
+        if (checkEmailResult.recordset.length > 0) {
+            res.status(400).send('Email đã tồn tại trong hệ thống.');
+            return;
+        }
+
+        // Check if the phone number already exists
+        request.input('SDT', sql.VarChar(15), txtSDT);
+        const checkPhoneResult = await request.query('SELECT * FROM [Users] WHERE SDT = @SDT');
+        if (checkPhoneResult.recordset.length > 0) {
+            res.status(400).send('Số điện thoại đã tồn tại trong hệ thống.');
+            return;
+        }
+
+        // Insert the new user
+        request.input('Ten', sql.VarChar(255), txtTenUser);
+        request.input('pass', sql.VarChar(255), txtPass);
+        request.input('Vaitro', sql.VarChar(5), txtVaiTro);
+        request.input('Quyen', sql.VarChar(255), quyen ? quyen.join(',') : '');
+
+        await request.query(`
+            INSERT INTO [Users] (IDUser, Ten, SDT, email, pass, Vaitro, Quyen)
+            VALUES (@IDUser, @Ten, @SDT, @email, @pass, @Vaitro, @Quyen)
+        `);
+
+        res.send('Thêm người dùng thành công');
     } catch (err) {
         console.error('Database query error:', err);
         res.status(500).send('Server error');
     }
 });
+
+
+// Route để sửa người dùng
+
+// Route to update a user
+app.post('/api/users/update', async (req, res) => {
+    const { txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen } = req.body;
+
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+
+        // Check if the email already exists for another user
+        request.input('email', sql.VarChar(255), txtEmail);
+        request.input('IDUser', sql.Char(6), txtIDUser);
+        const checkEmailResult = await request.query(`
+            SELECT * FROM [Users] WHERE email = @email AND IDUser != @IDUser
+        `);
+        if (checkEmailResult.recordset.length > 0) {
+            res.status(400).send('Email đã tồn tại trong hệ thống.');
+            return;
+        }
+
+        // Check if the phone number already exists for another user
+        request.input('SDT', sql.VarChar(15), txtSDT);
+        const checkPhoneResult = await request.query(`
+            SELECT * FROM [Users] WHERE SDT = @SDT AND IDUser != @IDUser
+        `);
+        if (checkPhoneResult.recordset.length > 0) {
+            res.status(400).send('Số điện thoại đã tồn tại trong hệ thống.');
+            return;
+        }
+
+        // Update the user information
+        request.input('Ten', sql.VarChar(255), txtTenUser);
+        request.input('pass', sql.VarChar(255), txtPass);
+        request.input('Vaitro', sql.VarChar(5), txtVaiTro);
+        request.input('Quyen', sql.VarChar(255), quyen ? quyen.join(',') : '');
+
+        await request.query(`
+            UPDATE [Users]
+            SET Ten = @Ten, SDT = @SDT, email = @email, pass = @pass, Vaitro = @Vaitro, Quyen = @Quyen
+            WHERE IDUser = @IDUser
+        `);
+
+        res.send('Sửa người dùng thành công');
+    } catch (err) {
+        console.error('Database query error:', err);
+        res.status(500).send('Server error');
+    }
+});
+
 
 // Route để xóa người dùng
-app.delete('/api/users/:email', async (req, res) => {
-    const { email } = req.params;
+app.post('/api/users/delete', async (req, res) => {
+    const { txtIDUser } = req.body;
+
     try {
         await sql.connect(config);
         const request = new sql.Request();
-        request.input('email', sql.VarChar, email);
+        request.input('IDUser', sql.Char(6), txtIDUser);
 
-        await request.query('DELETE FROM Users WHERE email = @email');
-        res.send('User deleted successfully');
+        // Delete from LichSuNhung first
+        await request.query('DELETE FROM LichSuNhung WHERE IDUser = @IDUser');
+
+        // Delete from LichSuTach
+        await request.query('DELETE FROM LichSuTach WHERE IDUser = @IDUser');
+        
+        // Optional: Delete from Admin if the user is an admin
+        await request.query('DELETE FROM Admin WHERE IDUser = @IDUser');
+
+        // Finally, delete the user from Users
+        await request.query('DELETE FROM [Users] WHERE IDUser = @IDUser');
+
+        res.send('Xóa người dùng thành công');
     } catch (err) {
         console.error('Database query error:', err);
         res.status(500).send('Server error');
     }
 });
 
-// Route để cập nhật người dùng
-// Route để cập nhật người dùng (bao gồm cả email, mật khẩu và vai trò)
-app.put('/api/users/:oldEmail', async (req, res) => {
-    const { oldEmail } = req.params;
-    const { email, password, role } = req.body;
 
-    // Kiểm tra các trường đầu vào
-    if (!email || !password || !role) {
-        return res.status(400).send('Missing required fields');
-    }
-    if (!email.endsWith('@gmail.com')) {
-        return res.status(400).send('Email must end with @gmail.com');
-    }
-    if (password.length < 6) {
-        return res.status(400).send('Password must be at least 6 characters long');
-    }
-
+// Route để lấy danh sách người dùng
+app.get('/api/users/list', async (req, res) => {
     try {
         await sql.connect(config);
-        const request = new sql.Request();
-        request.input('oldEmail', sql.VarChar, oldEmail);
-        request.input('email', sql.VarChar, email);
-        request.input('password', sql.VarChar, password);
-        request.input('role', sql.VarChar, role);
+        const result = await sql.query('SELECT IDUser, Ten, SDT, email, pass, Vaitro, Quyen FROM [Users]');
 
-        await request.query('UPDATE Users SET email = @email, password = @password, role = @role WHERE email = @oldEmail');
-        res.send('User updated successfully');
+        res.json(result.recordset); // Trả về danh sách người dùng dưới dạng JSON
     } catch (err) {
         console.error('Database query error:', err);
         res.status(500).send('Server error');
     }
 });
+
+
+app.get('/api/users/search/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+        request.input('IDUser', sql.Char(6), id);
+
+        const result = await request.query('SELECT IDUser, Ten, SDT, email, pass, Vaitro, Quyen FROM [Users] WHERE IDUser = @IDUser');
+        
+        if (result.recordset.length > 0) {
+            res.json(result.recordset[0]);
+        } else {
+            res.status(404).send('User not found');
+        }
+    } catch (err) {
+        console.error('Database query error:', err);
+        res.status(500).send('Server error');
+    }
+});
+
+
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'programs/display/login.html'));
+});
+
 
 
 // Tạo các route để phục vụ tài nguyên tĩnh
