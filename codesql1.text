@@ -1,0 +1,84 @@
+-- Tạo Database
+CREATE DATABASE nhom4;
+
+-- Sử dụng database
+USE nhom4;
+
+CREATE TABLE [NguoiDung] (
+    IDUser CHAR(6) PRIMARY KEY, -- IDUser gồm 6 ký tự
+    Ten VARCHAR(255) NOT NULL,
+    SDT VARCHAR(15) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Pass VARCHAR(255) NOT NULL CHECK (LEN(pass) > 6), -- Sử dụng LEN
+    Vaitro VARCHAR(5) CHECK (Vaitro IN ('admin', 'user')) DEFAULT 'user', -- Vai trò với mặc định là user
+    PhanQuyen VARCHAR(255) -- Quyền hiện có
+);
+
+
+
+-- Tạo bảng Admin
+CREATE TABLE Admin (
+    IDAdmin INT IDENTITY(1,1) PRIMARY KEY, -- IDAdmin tự động tăng
+    Ten VARCHAR(255) NOT NULL,
+    IDUser CHAR(6), -- Khóa ngoại đến IDUser của bảng User
+    FOREIGN KEY (IDUser) REFERENCES [Users](IDUser) -- Sử dụng [User] nếu bạn đã dùng dấu ngoặc vuông trong tên bảng User
+);
+
+
+
+CREATE TABLE LichSuNhung (
+    IDNhung INT IDENTITY(1,1) PRIMARY KEY, -- IDNhung tự động tăng
+    IDUser CHAR(6), -- Khóa ngoại đến IDUser của bảng User
+    ThoiGianNhung DATETIME DEFAULT GETDATE(), -- Lịch sử nhúng theo thời gian thực
+    FOREIGN KEY (IDUser) REFERENCES [Users] (IDUser) -- Khóa ngoại đến bảng User
+);
+
+
+-- Tạo bảng Tach
+CREATE TABLE LichSuTach (
+    IDTach INT IDENTITY(1,1) PRIMARY KEY, -- IDTach tự động tăng
+    IDUser CHAR(6), -- Khóa ngoại đến IDUser của bảng User
+    ThoiGianTach DATETIME DEFAULT GETDATE(), -- Lịch sử tách theo thời gian thực
+    FOREIGN KEY (IDUser) REFERENCES [Users] (IDUser) -- Khóa ngoại đến bảng User
+);
+
+CREATE TRIGGER trg_AddAdmin
+ON [Users]
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO Admin (Ten, IDUser)
+    SELECT Ten, IDUser
+    FROM inserted
+    WHERE Vaitro = 'admin';
+END;
+
+CREATE TRIGGER trg_AddLichSuNhung
+ON [Users]
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO LichSuNhung (IDUser)
+    SELECT IDUser
+    FROM inserted;
+END;
+
+CREATE TRIGGER trg_AddLichSuTach
+ON [Users]
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO LichSuTach (IDUser)
+    SELECT IDUser
+    FROM inserted;
+END;
+
+
+
+INSERT INTO [Users] (IDUser, Ten, SDT, email, pass, Vaitro, Quyen)
+VALUES ('U00001', 'Nguyen Van A', '0901234567', 'nguyenvana@example.com', 'password123', 'admin', 'Nhung,Tach,Xemthongtin');
+
+INSERT INTO [Users] (IDUser, Ten, SDT, email, pass, Vaitro, Quyen)
+VALUES ('U00002', 'Tran Thi B', '0909876543', 'tranthib@example.com', 'password456', 'user','Nhung');
+
+
