@@ -9,6 +9,7 @@ const app = express(); // Khởi tạo ứng dụng express
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 // Thiết lập middleware cho session
 app.use(session({
     secret: 'your-secret-key',
@@ -42,6 +43,63 @@ function getCurrentDateTime() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
+app.get('/api/users/current', async (req, res) => {
+    if (req.session.idUser) {
+        try {
+            await sql.connect(config);
+            const request = new sql.Request();
+            request.input('IDUser', sql.Char(6), req.session.idUser);
+            
+            // Truy vấn thông tin người dùng dựa trên IDUser trong session
+            const result = await request.query(`
+                SELECT IDUser, Ten, SDT, email 
+                FROM [Users] 
+                WHERE IDUser = @IDUser
+            `);
+            
+            if (result.recordset.length > 0) {
+                const user = result.recordset[0];
+                res.json({
+                    idUser: user.IDUser,
+                    tenUser: user.Ten,
+                    sdt: user.SDT,
+                    email: user.email
+                });
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        } catch (err) {
+            console.error('Database query error:', err);
+            res.status(500).json({ error: 'Server error' });
+        }
+    } else {
+        res.status(401).json({ error: 'User not logged in' });
+    }
+});
+
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Logout error:', err);
+            res.status(500).json({ success: false, message: 'Logout failed' });
+        } else {
+            res.clearCookie('connect.sid'); // Xóa cookie session
+            res.json({ success: true, message: 'Logout successful' });
+        }
+    });
+});
+//// Route để hiển thị trang user-ìnof
+
+app.get('/user-info.html', (req, res) => {
+    if (req.session.idUser) {
+        res.sendFile(path.resolve(__dirname, 'programs/display/user-info.html'));
+    } else {
+        res.redirect('/login.html');
+    }
+});
+
+
 // Route để hiển thị trang đăng nhập
 app.get('/', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'programs/display/login.html'));
@@ -60,10 +118,18 @@ app.get('/admin.html', (req, res) => {
 
 
 app.get('/index.html', (req, res) => {
-    if (req.session.role === 'user') {
+    if (req.session.role === 'user' || req.session.role === 'admin') {
         res.sendFile(path.resolve(__dirname, 'programs/display/index.html'));
     } else {
         res.status(403).send('Access denied.');
+    }
+});
+
+app.get('/api/users/role', (req, res) => {
+    if (req.session.role) {
+        res.json({ role: req.session.role });
+    } else {
+        res.status(401).json({ error: 'User not logged in' });
     }
 });
 

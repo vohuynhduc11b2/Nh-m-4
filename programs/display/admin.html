@@ -103,6 +103,21 @@
            transition: background-color 0.3s ease;
             margin-left: 5px; /* Thêm khoảng cách nhỏ giữa các nút */
             } 
+            .btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #3b79c6;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
 
 .search-btn:hover {
     background-color: #3b79c6;
@@ -250,11 +265,29 @@
         </div>
         <div class="center">
             <input style="position: absolute; margin-top: 550px; left: 1100px;" type="submit" value="Đăng xuất" onclick="window.location.href='/login.html';">
+            <input style="position: absolute; margin-top: 550px; left: 1250px;" type="button" value="Trang Chủ" onclick="goToHomePage();" class="btn">
         </div>
       
     </div>
 
     <script>
+        async function goToHomePage() {
+        try {
+            const response = await fetch('/api/users/role');
+            const data = await response.json();
+            
+            if (data.role === 'user' || data.role === 'admin') {
+                const confirmed = confirm("Bạn không thể quay lại trang này nếu bạn không đăng nhập với vai trò admin lần nữa. Bạn có muốn tiếp tục?");
+                if (confirmed) {
+                    window.location.href = '/index.html';
+                }
+            } else {
+                alert('Access denied: You do not have permission to access this page.');
+            }
+        } catch (error) {
+            console.error('Error fetching role:', error);
+        }
+    }
        document.getElementById('txtVaiTro').addEventListener('change', function() {
             const isUser = this.value === 'user';
             const quyenXemBaoMat = document.getElementById('quyen_xem_bao_mat');
@@ -279,7 +312,7 @@
             loadUserList();
         };
         function clearForm() {
-    document.getElementById('txtIDUser').value = '';
+            document.getElementById('txtIDUser').value = '';
     document.getElementById('txtTenUser').value = '';
     document.getElementById('txtSDT').value = '';
     document.getElementById('txtEmail').value = '';
@@ -288,6 +321,7 @@
     document.getElementById('quyen_nhung').checked = false;
     document.getElementById('quyen_tach').checked = false;
     document.getElementById('quyen_xem_bao_mat').checked = false;
+    originalIDUser = ''; // Đặt lại giá trị ban đầu của IDUser
 }
 
 
@@ -351,23 +385,35 @@
 
             userList.appendChild(row);
         }
+        let originalIDUser = ''; // Biến lưu IDUser ban đầu khi chỉnh sửa
 
         function fillFormWithUser(user) {
-            document.getElementById('txtIDUser').value = user.IDUser;
-            document.getElementById('txtTenUser').value = user.Ten;
-            document.getElementById('txtSDT').value = user.SDT;
-            document.getElementById('txtEmail').value = user.email;
-            document.getElementById('txtPass').value = user.pass;
-            document.getElementById('txtVaiTro').value = user.Vaitro;
+    document.getElementById('txtIDUser').value = user.IDUser;
+    originalIDUser = user.IDUser; // Lưu IDUser ban đầu
 
-            const quyenArray = user.Quyen ? user.Quyen.split(',') : [];
-            document.getElementById('quyen_nhung').checked = quyenArray.includes('Nhung');
-            document.getElementById('quyen_tach').checked = quyenArray.includes('Tach');
-            document.getElementById('quyen_xem_bao_mat').checked = quyenArray.includes('Xemthongtin');
-        }
+    document.getElementById('txtTenUser').value = user.Ten;
+    document.getElementById('txtSDT').value = user.SDT;
+    document.getElementById('txtEmail').value = user.email;
+    document.getElementById('txtPass').value = user.pass;
+    document.getElementById('txtVaiTro').value = user.Vaitro;
+
+    const quyenArray = user.Quyen ? user.Quyen.split(',') : [];
+    document.getElementById('quyen_nhung').checked = quyenArray.includes('Nhung');
+    document.getElementById('quyen_tach').checked = quyenArray.includes('Tach');
+    document.getElementById('quyen_xem_bao_mat').checked = quyenArray.includes('Xemthongtin');
+}
+
         async function addUser() {
-            const txtSDT = document.getElementById('txtSDT').value;
+    const txtIDUser = document.getElementById('txtIDUser').value;
+    const txtSDT = document.getElementById('txtSDT').value;
     const txtEmail = document.getElementById('txtEmail').value;
+
+    // Kiểm tra định dạng ID người dùng (chữ đầu là U và 5 chữ số)
+    const idPattern = /^U\d{5}$/;
+    if (!idPattern.test(txtIDUser)) {
+        alert("ID người dùng phải bắt đầu bằng chữ U và theo sau là 5 chữ số.");
+        return;
+    }
 
     // Validate phone number
     if (txtSDT.length !== 10 || isNaN(txtSDT)) {
@@ -381,81 +427,79 @@
         return;
     }
 
-    const txtIDUser = document.getElementById('txtIDUser').value;
     const txtTenUser = document.getElementById('txtTenUser').value;
     const txtPass = document.getElementById('txtPass').value;
     const txtVaiTro = document.getElementById('txtVaiTro').value;
+    
+    const quyen = [];
+    if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
+    if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
+    if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
 
-            const quyen = [];
-            if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
-            if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
-            if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
+    try {
+        const response = await fetch('/api/users/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
+        });
 
-            try {
-                const response = await fetch('/api/users/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
-                });
-
-                const result = await response.text();
-                alert(result);
-                if (response.ok)
-                { 
-                    loadUserList();
-                     clearForm();
-                }
-                else console.error('Error adding user:', result);
-            } catch (error) {
-                console.error('Fetch error:', error);
-            }
+        const result = await response.text();
+        alert(result);
+        if (response.ok) { 
+            loadUserList();
+            clearForm();
+        } else {
+            console.error('Error adding user:', result);
         }
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
+}
+
 
         async function updateUser() {
-
-            const txtSDT = document.getElementById('txtSDT').value;
-    const txtEmail = document.getElementById('txtEmail').value;
-
-    // Validate phone number
-    if (txtSDT.length !== 10 || isNaN(txtSDT)) {
-        alert("Số điện thoại phải là 10 chữ số.");
-        return;
-    }
-
-    // Validate email
-    if (!txtEmail.includes('@')) {
-        alert("Email phải chứa ký tự '@'.");
-        return;
-    }
-            
             const txtIDUser = document.getElementById('txtIDUser').value;
-            const txtTenUser = document.getElementById('txtTenUser').value;
-            const txtPass = document.getElementById('txtPass').value;
-            const txtVaiTro = document.getElementById('txtVaiTro').value;
-            const quyen = [];
-            if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
-            if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
-            if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
 
-            try {
-                const response = await fetch('/api/users/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
-                });
+// Kiểm tra nếu IDUser đã bị thay đổi
+if (txtIDUser !== originalIDUser) {
+    alert("Không được phép thay đổi ID người dùng khi sửa. Hãy giữ nguyên ID ban đầu.");
+    document.getElementById('txtIDUser').value = originalIDUser; // Đặt lại giá trị ban đầu
+    return; // Dừng hàm nếu IDUser bị thay đổi
+}
 
-                const result = await response.text();
-                alert(result);
-                if (response.ok)
-                { 
-                    loadUserList();
-                     clearForm();
-                }
-                else console.error('Error updating user:', result);
-            } catch (error) {
-                console.error('Fetch error:', error);
-            }
+// Tiếp tục xử lý cập nhật người dùng
+const txtTenUser = document.getElementById('txtTenUser').value;
+const txtSDT = document.getElementById('txtSDT').value;
+const txtEmail = document.getElementById('txtEmail').value;
+const txtPass = document.getElementById('txtPass').value;
+const txtVaiTro = document.getElementById('txtVaiTro').value;
+
+const quyen = [];
+if (document.getElementById('quyen_nhung').checked) quyen.push('Nhung');
+if (document.getElementById('quyen_tach').checked) quyen.push('Tach');
+if (document.getElementById('quyen_xem_bao_mat').checked) quyen.push('Xemthongtin');
+
+try {
+    const response = await fetch('/api/users/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ txtIDUser, txtTenUser, txtSDT, txtEmail, txtPass, txtVaiTro, quyen })
+    });
+
+    const result = await response.text();
+    alert(result);
+    if (response.ok) {
+        loadUserList();
+        clearForm();
+    } else {
+        console.error('Error updating user:', result);
+    }
+} catch (error) {
+    console.error('Fetch error:', error);
+}
         }
+
+
 
         async function deleteUser() {
             const txtIDUser = document.getElementById('txtIDUser').value;

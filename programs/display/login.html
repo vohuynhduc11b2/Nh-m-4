@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
     <title>Đăng nhập</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+  
+  body {
+            font-family: "Roboto", sans-serif;
+            background: linear-gradient(135deg, #0d0d0d, #1e1e1e);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,48 +19,76 @@
         }
 
         .login-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            background-color: rgba(30, 30, 30, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+            width: 320px;
             text-align: center;
         }
 
-        h2 {
-            margin-bottom: 20px;
+        .login-container h2 {
+            color: #00d4ff;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-shadow: 1px 1px 10px rgba(0, 212, 255, 0.9);
+            font-size: 24px;
         }
 
-        label {
+        .login-container label {
             display: block;
+            margin: 20px 0 5px;
+            font-size: 14px;
+            color: #cccccc;
             text-align: left;
-            margin-bottom: 5px;
-            font-weight: bold;
         }
 
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: calc(100% - 30px);
+            padding: 12px 15px;
             margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        input[type="submit"] {
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
+            border: 1.5px solid #00d4ff;
+            border-radius: 8px;
             font-size: 16px;
+            background-color: #243b55;
+            color: #ffffff;
+            transition: all 0.3s ease;
         }
 
-        input[type="submit"]:hover {
-            background-color: #0056b3;
+        .login-container input[type="text"]:focus,
+        .login-container input[type="password"]:focus {
+            border-color: #00d4ff;
+            outline: none;
+            box-shadow: 0 0 10px #00d4ff;
+            background-color: #141e30;
         }
+
+        .login-container input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #00d4ff, #0077b6);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .login-container input[type="submit"]:hover {
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.7);
+            transform: translateY(-3px);
+        }
+
+        .login-container input[type="submit"]:active {
+            transform: translateY(2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.5);
+        }
+    </style>
     </style>
     <script>
         function validateForm() {
@@ -111,10 +142,10 @@
     <div class="login-container">
         <h2>Đăng nhập</h2>
         <form id="loginForm" onsubmit="handleLogin(event)">
-            <label for="idUser">ID:</label>
+            <label for="idUser">ID</label>
             <input type="text" id="idUser" name="idUser" required>
         
-            <label for="password">Mật khẩu:</label>
+            <label for="password">Mật khẩu</label>
             <input type="password" id="password" name="password" required>
         
             <input type="submit" value="Đăng nhập">

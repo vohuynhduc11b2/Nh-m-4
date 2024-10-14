@@ -1,205 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Nhóm 4</title>
+  <head>
+    <title>Nhóm 4 - Steganography Tool</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="http://www.peter-eigenschink.at/blog/favicon.ico" type="image/x-icon" rel="shortcut icon">
-    <script src="/build/mammoth.browser.min.js"></script>
-    <script src="/build/exportword.js"></script> <!-- Thư viện docx -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="http://www.peter-eigenschink.at/blog/favicon.ico"
+      type="image/x-icon"
+      rel="shortcut icon"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/css/background.css">
-    <link rel="stylesheet" href="/css/all.min.css">
+    <script src="/build/mammoth.browser.min.js"></script>
+    <script src="/build/exportword.js"></script>
     <script src="/build/all.min.js"></script>
-</head>
-<body>
-    <div id="main">
-        <i class="fa fa-bars"></i>
-        <div class="dropdown-menu" id="dropdownMenu">
-            <a href="#" class="logout-icon" id="logoutLink">
-                <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon" title="Logout"></i> Đăng xuất      
-            </a>
-        </div>
 
-        <h1></h1>
+    <style>
+   .info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
+  .info div {
+    display: flex;
+    align-items: center;
+  }
+
+  .info label {
+    width: 70px; /* Adjust this width as needed */
+    font-weight: bold;
+  }
+
+
+
+
+ 
+    </style>
+  </head>
+  <body>
+    <!-- Menu Icon to toggle the sidebar -->
+    <i class="fas fa-bars menu-icon" id="menuToggle"></i>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <!-- User Info Section in Sidebar -->
+      <div class="user-info">
+        <img src="https://via.placeholder.com/60" alt="User Avatar" />
+        <h3 id="username">Đang tải...</h3>
+        <!-- Sửa thành Đang tải... để hiển thị tạm thời -->
+      </div>
+
+      <a href="#" id="homeLink"><i class="fas fa-home"></i> Trang chủ</a>
+      <a href="#" id="userInfoLink"><i class="fas fa-user"></i> Thông tin cá nhân</a>
+      <a href="#"><i class="fas fa-history"></i> Xem lịch sử hoạt động</a>
+      <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+      <i class="fas fa-times close-btn" id="closeSidebar"></i>
+
+    </div>
+    <!-- Thông Tin Cá Nhân -->
+<div id="userInfoSection" class="container" style="display: none;">
+  <h1>Thông tin cá nhân</h1>
+  <div class="info">
+    <div>
+      <label>ID:</label> <span id="userId">Đang tải...</span>
+    </div>
+    <div>
+      <label>Tên:</label> <span id="userName">Đang tải...</span>
+    </div>
+    <div>
+      <label>SĐT:</label> <span id="userPhone">Đang tải...</span>
+    </div>
+    <div>
+      <label>Email:</label> <span id="userEmail">Đang tải...</span>
+    </div>
+  </div>
+  <button class="btn-back" onclick="hideUserInfo()">Trở về</button>
+</div>
+
+
+    <!-- Main Content -->
+    <div id="main" class="main-content">
+     
+
+      <h1>Steganography Tool</h1>
+
+      <!-- Hai Nút Chức Năng Chính -->
+      <div class="mode-buttons" id="modeButtons">
+        <button id="embedModeBtn" class="btn btn-primary">
+          Nhúng văn bản vào hình ảnh
+        </button>
+        <button id="extractModeBtn" class="btn btn-secondary">
+          Phân tách văn bản từ hình ảnh
+        </button>
+      </div>
+
+      <!-- Form Nhúng Văn Bản -->
+      <div id="embedSection" class="form-section">
         <div id="left">
-            <h2>Ảnh:</h2>
-            <input id="file" type="file" accept=".png,.jpg" />
-            <h2>Văn bản:</h2>
+          <h2>Bước 1: Tải lên hình ảnh</h2>
+          <input id="file" type="file" accept=".png,.jpg,.jpeg" />
+
+          <h2>Bước 2: Chọn tải lên văn bản hoặc nhập văn bản</h2>
+          <div id="textOptions">
+            <button id="uploadTextBtn" class="btn btn-outline-primary">
+              Tải lên văn bản
+            </button>
+            <button id="inputTextBtn" class="btn btn-outline-secondary">
+              Nhập văn bản
+            </button>
+          </div>
+          <div
+            id="uploadTextContainer"
+            class="invisible"
+            style="margin-top: 10px"
+          >
             <input type="file" id="textFile" accept=".txt,.docx" />
-            <textarea id="text" maxlength="1000"></textarea> <!-- Giới hạn 1000 ký tự -->
-            <div class="btns">
-                <button id="hide" class="btn btn-outline-primary btn-lg btn-block">Nhúng</button>
-                <button id="read" class="btn btn-outline-primary btn-lg btn-block">Đọc</button>
-            </div>
+          </div>
+          <div
+            id="inputTextContainer"
+            class="invisible"
+            style="margin-top: 10px"
+          >
+            <textarea
+              id="text"
+              maxlength="1000"
+              placeholder="Nhập văn bản tại đây..."
+            ></textarea>
+          </div>
+          <div class="error-message" id="embedErrorMessage"></div>
+          <div class="btns">
+            <button id="hide" class="btn btn-outline-primary">Nhúng</button>
+          </div>
+          <div
+            class="btn-row"
+            style="display: flex; justify-content: space-between"
+          >
+            <button id="backEmbedBtn" class="btn btn-back">Trở về</button>
+            <button id="continueExtractBtn" class="btn btn-continue">
+              Tiếp tục tách
+            </button>
+          </div>
         </div>
 
         <div id="right">
-            <div class="image-columns">
-                <div class="image-container">
-                    <h2>Ảnh gốc:</h2>
-                    <img id="img" src="" />
-                </div>
-                <div class="image-container">
-                    <h2>Ảnh nhúng:</h2>
-                    <img id="cover" src="" />
-                    <a id="download" download="anh.png">Tải xuống</a>
-                    <div class="note"></div>
-                </div>
+          <div class="image-display">
+            <div class="image-container">
+              <h2>Ảnh gốc:</h2>
+              <img id="img" src="" alt="Ảnh gốc" />
+
             </div>
-            <div id="messageArea"  class="invisible">
-                <h2>Mã:</h2>
-                <div id="message"></div>
+            <div class="image-container">
+              <h2>Ảnh nhúng:</h2>
+              <img id="cover" src="" alt="Ảnh nhúng" />
             </div>
-            <button id="downloadWord" style="display:none;" class="btn">Tải về Word</button>
+          </div>
+          <a  id="download"
+            download="anh.png"
+            class="btn btn-success"
+            style="display: none " 
+            >Tải xuống</a
+          >
+          <div class="note"></div>
+          <div id="messageArea" class="invisible">
+            <h2>Mã:</h2>
+            <div id="message"></div>
+          </div>
+          <button id="downloadWord" style="display: none" class="btn btn-info">
+            Tải về Word
+          </button>
+        </div>
+      </div>
+
+      <!-- Form Phân Tách Văn Bản -->
+      <div id="extractSection" class="form-section">
+        <div id="left">
+          <h2>Tải lên hình ảnh để phân tách văn bản</h2>
+          <input id="extractFile" type="file" accept=".png,.jpg,.jpeg" />
+          <div class="error-message" id="extractErrorMessage"></div>
+          <div class="btns">
+            <button id="read" class="btn btn-outline-primary">Đọc</button>
+          </div>
+          <div
+            class="btn-row"
+            style="display: flex; justify-content: space-between"
+          >
+            <button id="backExtractBtn" class="btn btn-back">Trở về</button>
+          </div>
         </div>
 
-        <div class="clear"></div>
-
-        <div class="footer">
-            <a>Thành Viên: </a> 
+        <div id="right">
+          <div class="image-display">
+            <div class="image-container">
+              <h2>Ảnh đã chọn:</h2>
+              <img id="selectedImage" src="" alt="Ảnh đã chọn" />
+            </div>
+            <div class="text-container">
+              <h2>Văn bản đã phân tách:</h2>
+              <textarea id="extractedText" readonly></textarea>
+            </div>
+          </div>
+          <div id="extractedMessageArea" class="invisible">
+            <h2>Mã:</h2>
+            <div id="extractedMessage"></div>
+          </div>
+          <button
+            id="downloadExtractedWord"
+            style="display: none"
+            class="btn btn-info"
+          >
+            Tải về Word
+          </button>
         </div>
+      </div>
+
+      <div class="clear"></div>
+
+      <div class="footer">
+        <a>Thành Viên: Nhóm 4</a>
+      </div>
     </div>
 
     <script type="text/javascript" src="/build/steganography.js"></script>
     <script type="text/javascript">
-        function handleFileSelect(evt) {
-            var img = document.getElementById("img");
-            var cover = document.getElementById("cover");
-            var message = document.getElementById("message");
-            var files = evt.target.files;
+      // Hàm Xử Lý Tải Ảnh Cho Nhúng
+      function handleFileSelect(evt) {
+        var img = document.getElementById("img");
+        var cover = document.getElementById("cover");
+        var message = document.getElementById("message");
+        var files = evt.target.files;
 
-            for (var i = 0, f; f = files[i]; i++) {
-                if (!f.type.match('image.*')) continue;
-                var reader = new FileReader();
-                reader.onload = (function(theFile) {
-                    return function(e) {
-                        img.src = e.target.result;
-                        img.title = escape(theFile.name);
-                        cover.src = "";
-                        message.innerHTML = "";
-                        message.parentNode.classList.add("invisible");
-                        UpdateLimit();
-                    };
-                })(f);
-                reader.readAsDataURL(f);
-            }
+        for (var i = 0, f; (f = files[i]); i++) {
+          if (!f.type.match("image.*")) continue;
+          var reader = new FileReader();
+          reader.onload = (function (theFile) {
+            return function (e) {
+              img.src = e.target.result;
+              img.title = escape(theFile.name);
+              cover.src = "";
+              message.innerHTML = "";
+              message.parentNode.classList.add("invisible");
+              UpdateLimit();
+              document.getElementById("download").style.display = "none";
+              document.getElementById("downloadWord").style.display = "none";
+              document.getElementById("embedErrorMessage").textContent = "";
+            };
+          })(f);
+          reader.readAsDataURL(f);
+        }
+      }
+
+      // Hàm Xử Lý Tải Văn Bản Cho Nhúng
+      function handleTextFileSelect(evt) {
+        var file = evt.target.files[0];
+        var textarea = document.getElementById("text");
+
+        if (file && file.name.endsWith(".txt")) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var textContent = e.target.result;
+            textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
+            UpdateLimit();
+          };
+          reader.readAsText(file);
+        } else if (file && file.name.endsWith(".docx")) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            mammoth
+              .extractRawText({ arrayBuffer: e.target.result })
+              .then(function (result) {
+                var textContent = result.value; // Kết quả là nội dung văn bản
+                textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
+                UpdateLimit();
+              })
+              .catch(function (err) {
+                console.error("Error reading DOCX file: ", err);
+              });
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      }
+
+      // Hàm Nhúng Văn Bản Vào Hình Ảnh
+      function hide() {
+        var imgSrc = document.getElementById("img").src;
+        var cover = document.getElementById("cover");
+        var textarea = document.getElementById("text");
+        var download = document.getElementById("download");
+        var embedErrorMessage = document.getElementById("embedErrorMessage");
+
+        if (!imgSrc) {
+          embedErrorMessage.textContent = "Vui lòng tải lên hình ảnh trước.";
+          return;
+        }
+        if (!textarea.value) {
+          embedErrorMessage.textContent = "Vui lòng tải lên hoặc nhập văn bản.";
+          return;
+        }
+        embedErrorMessage.textContent = "";
+
+        cover.src = steg.encode(textarea.value, imgSrc);
+        download.href = cover.src.replace("image/png", "image/octet-stream");
+        download.style.display = "block"; // Hiển thị nút tải xuống khi nhúng xong
+      }
+
+      // Hàm Đọc Văn Bản Từ Hình Ảnh
+      function read() {
+        var fileInput = document.getElementById("extractFile");
+        var file = fileInput.files[0];
+        var message = document.getElementById("extractedMessage");
+        var extractedText = document.getElementById("extractedText");
+        var downloadWord = document.getElementById("downloadExtractedWord");
+        var extractErrorMessage = document.getElementById(
+          "extractErrorMessage"
+        );
+        var selectedImage = document.getElementById("selectedImage");
+
+        if (!file) {
+          extractErrorMessage.textContent = "Vui lòng tải lên hình ảnh trước.";
+          return;
+        } else {
+          extractErrorMessage.textContent = "";
         }
 
-        function handleTextFileSelect(evt) {
-            var file = evt.target.files[0];
-            var textarea = document.getElementById("text");
-        
-            if (file && file.name.endsWith('.txt')) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var textContent = e.target.result;
-                    textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
-                    UpdateLimit();
-                };
-                reader.readAsText(file);
-            } else if (file && file.name.endsWith('.docx')) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    mammoth.extractRawText({ arrayBuffer: e.target.result })
-                        .then(function(result) {
-                            var textContent = result.value; // Kết quả là nội dung văn bản
-                            textarea.value = textContent.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
-                            UpdateLimit();
-                        })
-                        .catch(function(err) {
-                            console.error("Error reading DOCX file: ", err);
-                        });
-                };
-                reader.readAsArrayBuffer(file);
+        var imgElement = new Image();
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          imgElement.src = e.target.result;
+          selectedImage.src = e.target.result;
+          imgElement.onload = function () {
+            var decodedMessage = steg.decode(imgElement);
+            if (decodedMessage) {
+              message.innerHTML = decodedMessage;
+              extractedText.value = decodedMessage.substring(0, 1000);
+              document
+                .getElementById("extractedMessageArea")
+                .classList.remove("invisible");
+              UpdateLimit();
+              downloadWord.style.display = "inline-block"; // Hiển thị nút tải về Word khi đọc xong
+            } else {
+              message.innerHTML = "";
+              document
+                .getElementById("extractedMessageArea")
+                .classList.add("invisible");
+              downloadWord.style.display = "none"; // Ẩn nút nếu không có nội dung
             }
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Hàm Cập Nhật Giới Hạn Ký Tự
+      function UpdateLimit() {
+        var note = document.querySelector(".note");
+        if (note) {
+          note.innerHTML = "Bạn có thể nhúng tối đa 1000 ký tự.";
         }
+      }
 
-        function hide() {
-            var img = document.getElementById("img");
-            var cover = document.getElementById("cover");
-            var textarea = document.getElementById("text");
-            var download = document.getElementById("download");
+      // Hàm Xuất Văn Bản Ra Word (Cho Nhúng)
+      function exportToWord() {
+        var messageText = document.getElementById("message").innerText;
+        if (messageText) {
+          const doc = new docx.Document({
+            sections: [
+              {
+                properties: {},
+                children: [new docx.Paragraph(messageText)],
+              },
+            ],
+          });
 
-            if (img && textarea) {
-                cover.src = steg.encode(textarea.value, img);
-                download.href = cover.src.replace("image/png", "image/octet-stream");
-                download.style.display = "block"; // Hiển thị nút tải xuống khi nhúng xong
-            }
+          // Tạo file Word và tải về
+          docx.Packer.toBlob(doc).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "Nội_dung_ẩn.docx";
+            link.click();
+          });
         }
+      }
 
-        function read() {
-            var img = document.getElementById("img");
-            var message = document.getElementById("message");
-            var textarea = document.getElementById("text");
-            var downloadWord = document.getElementById("downloadWord");
+      // Hàm Xuất Văn Bản Phân Tách Ra Word
+      function exportExtractedToWord() {
+        var messageText = document.getElementById("extractedMessage").innerText;
+        if (messageText) {
+          const doc = new docx.Document({
+            sections: [
+              {
+                properties: {},
+                children: [new docx.Paragraph(messageText)],
+              },
+            ],
+          });
 
-            if (img && textarea) {
-                message.innerHTML = steg.decode(img);
-                if (message.innerHTML !== "") {
-                    message.parentNode.classList.remove("invisible");
-                    textarea.value = message.innerHTML.substring(0, 1000); // Chỉ lấy 1000 ký tự đầu tiên
-                    UpdateLimit();
-                    downloadWord.style.display = "inline-block"; // Hiển thị nút tải về Word khi đọc xong
-                } else {
-                    message.parentNode.classList.add("invisible");
-                    downloadWord.style.display = "none"; // Ẩn nút nếu không có nội dung
-                }
-            }
+          // Tạo file Word và tải về
+          docx.Packer.toBlob(doc).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "Văn_bản_phân_tách.docx";
+            link.click();
+          });
         }
+      }
 
-        function UpdateLimit() {
-    var note = document.querySelector(".note");
-    note.innerHTML = "Bạn có thể nhúng tối đa 1000 ký tự.";
+      // Hàm Hiển Thị/Hiden Form Nhúng và Phân Tách
+      function toggleSection(sectionId) {
+        var embedSection = document.getElementById("embedSection");
+        var extractSection = document.getElementById("extractSection");
+        var modeButtons = document.getElementById("modeButtons");
+
+        if (sectionId === "embed") {
+          embedSection.classList.add("active");
+          extractSection.classList.remove("active");
+          modeButtons.style.display = "none";
+        } else if (sectionId === "extract") {
+          extractSection.classList.add("active");
+          embedSection.classList.remove("active");
+          modeButtons.style.display = "none";
+        }
+      }
+
+      // Hàm Hiển Thị Form Nhúng
+      function showEmbedForm() {
+        toggleSection("embed");
+      }
+
+      // Hàm Hiển Thị Form Phân Tách
+      function showExtractForm() {
+        toggleSection("extract");
+      }
+
+      // Hàm Trở về Giao Diện Chính
+      function backToMain() {
+        var embedSection = document.getElementById("embedSection");
+        var extractSection = document.getElementById("extractSection");
+        var modeButtons = document.getElementById("modeButtons");
+
+        embedSection.classList.remove("active");
+        extractSection.classList.remove("active");
+        modeButtons.style.display = "flex";
+
+        // Reset các form khi trở về
+        resetForms();
+      }
+
+      // Hàm Reset Các Form Khi Trở về
+      function resetForms() {
+        // Reset Form Nhúng
+        var img = document.getElementById("img");
+        var cover = document.getElementById("cover");
+        var message = document.getElementById("message");
+        var textarea = document.getElementById("text");
+        var download = document.getElementById("download");
+        var downloadWord = document.getElementById("downloadWord");
+        var embedErrorMessage = document.getElementById("embedErrorMessage");
+
+        img.src = "";
+        cover.src = "";
+        message.innerHTML = "";
+        message.parentNode.classList.add("invisible");
+        textarea.value = "";
+        download.style.display = "none";
+        downloadWord.style.display = "none";
+        embedErrorMessage.textContent = "";
+
+        // Reset Form Phân Tách
+        var extractFile = document.getElementById("extractFile");
+        var extractedText = document.getElementById("extractedText");
+        var extractedMessage = document.getElementById("extractedMessage");
+        var extractedMessageArea = document.getElementById(
+          "extractedMessageArea"
+        );
+        var downloadExtractedWord = document.getElementById(
+          "downloadExtractedWord"
+        );
+        var extractErrorMessage = document.getElementById(
+          "extractErrorMessage"
+        );
+        var selectedImage = document.getElementById("selectedImage");
+
+        extractFile.value = "";
+        extractedText.value = "";
+        extractedMessage.innerHTML = "";
+        extractedMessageArea.classList.add("invisible");
+        downloadExtractedWord.style.display = "none";
+        extractErrorMessage.textContent = "";
+        selectedImage.src = "";
+
+        // Reset Các Lựa Chọn Trong Form Nhúng
+        var uploadTextContainer = document.getElementById(
+          "uploadTextContainer"
+        );
+        var inputTextContainer = document.getElementById("inputTextContainer");
+        uploadTextContainer.classList.add("invisible");
+        inputTextContainer.classList.add("invisible");
+      }
+
+      // Hàm Chuyển Đổi từ Nhúng sang Phân tách
+      function continueToExtract() {
+        toggleSection("extract");
+        // Reset form nhúng khi chuyển đổi
+        resetForms();
+      }
+      function closeSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  const mainContent = document.querySelector(".main-content");
+  
+  sidebar.classList.remove("active");
+  mainContent.classList.remove("with-sidebar");
 }
 
 
-        function exportToWord() {
-            var messageText = document.getElementById("message").innerText;
-            if (messageText) {
-                const doc = new docx.Document({
-                    sections: [
-                        {
-                            properties: {},
-                            children: [
-                                new docx.Paragraph(messageText),
-                            ],
-                        },
-                    ],
-                });
+      // Hàm để hiển thị thông tin cá nhân
+function showUserInfo() {
+  document.getElementById("main").style.display = "none";
+  document.getElementById("userInfoSection").style.display = "block";
+  closeSidebar(); // Đóng sidebar khi chuyển sang Thông tin cá nhân
 
-                // Tạo file Word và tải về
-                docx.Packer.toBlob(doc).then((blob) => {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'Nội dung ẩn.docx';
-                    link.click();
-                });
-            }
+  fetch('/api/users/current')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('userId').innerText = data.idUser || 'N/A';
+      document.getElementById('userName').innerText = data.tenUser || 'N/A';
+      document.getElementById('userPhone').innerText = data.sdt || 'N/A';
+      document.getElementById('userEmail').innerText = data.email || 'N/A';
+    })
+    .catch(error => {
+      console.error('Error fetching user info:', error);
+    });
+}
+
+// Hàm để ẩn thông tin cá nhân và hiển thị lại giao diện chính
+function hideUserInfo() {
+  document.getElementById("userInfoSection").style.display = "none";
+  document.getElementById("main").style.display = "block";
+}
+// Hàm để hiển thị lại trang chính
+function showHomePage() {
+  // Hiển thị lại nội dung chính và ẩn phần thông tin cá nhân
+  document.getElementById("main").style.display = "block";
+  document.getElementById("userInfoSection").style.display = "none";
+  closeSidebar(); // Đóng sidebar khi chuyển về Trang chủ
+
+}
+
+
+      window.onload = function () {
+        // event listener vào nút Trang chủ
+document.getElementById("homeLink").addEventListener("click", function(event) {
+  event.preventDefault(); // Ngăn chặn hành động mặc định
+  showHomePage();
+});
+        // Thêm event listener vào liên kết Thông tin cá nhân
+document.getElementById("userInfoLink").addEventListener("click", function(event) {
+  event.preventDefault();
+  showUserInfo();
+});
+
+
+        
+        document.getElementById('logoutBtn').addEventListener('click', function (event) {
+    event.preventDefault(); // Ngăn chặn hành động mặc định
+    fetch('/logout', {
+        method: 'POST', // Sử dụng POST để đăng xuất
+        headers: {
+            'Content-Type': 'application/json'
         }
-
-        window.onload = function() {
-            document.getElementById('file').addEventListener('change', handleFileSelect, false);
-            document.getElementById('textFile').addEventListener('change', handleTextFileSelect, false);
-            document.getElementById('hide').addEventListener('click', hide, false);
-            document.getElementById('read').addEventListener('click', read, false);
-            document.getElementById('downloadWord').addEventListener('click', exportToWord, false);
-            document.getElementById('text').addEventListener('keyup', UpdateLimit, false);
-            
-            document.querySelector('.fa-bars').addEventListener('click', function() {
-                var dropdownMenu = document.getElementById('dropdownMenu');
-                dropdownMenu.classList.toggle('active'); // Hiển thị hoặc ẩn menu
-            });
-            
-            // Add event listener for both icon and text
-            document.getElementById('logoutLink').addEventListener('click', function() {
-                window.location.href = "/login.html";
-            });
-
-            UpdateLimit();
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/login.html'; // Điều hướng về trang đăng nhập sau khi đăng xuất
+        } else {
+            console.error('Logout failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+// Hiển thị hình ảnh đã chọn ở phần phân tách
+document.getElementById("extractFile").addEventListener("change", function (evt) {
+    var selectedImage = document.getElementById("selectedImage");
+    var file = evt.target.files[0];
+    if (file && file.type.match("image.*")) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            selectedImage.src = e.target.result;
         };
+        reader.readAsDataURL(file);
+    }
+    // Xóa nội dung đã phân tách cũ và reset lại phần tách
+    document.getElementById("extractedText").value = "";
+    document.getElementById("extractedMessage").innerHTML = "";
+    document.getElementById("extractedMessageArea").classList.add("invisible");
+    document.getElementById("downloadExtractedWord").style.display = "none";
+    document.getElementById("extractErrorMessage").textContent = "";
+}, false);
+
+
+
+
+        // Lấy thông tin user từ session
+        fetch("/api/users/current")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("username").innerText =
+              data.idUser || "Người dùng";
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          });
+
+        // Các event listeners và chức năng khác của bạn
+        document
+          .getElementById("embedModeBtn")
+          .addEventListener("click", showEmbedForm);
+        // Chuyển Đổi Chế Độ
+        document
+          .getElementById("embedModeBtn")
+          .addEventListener("click", showEmbedForm);
+        document
+          .getElementById("extractModeBtn")
+          .addEventListener("click", showExtractForm);
+
+        // Event listeners cho chế độ nhúng
+        document
+          .getElementById("file")
+          .addEventListener("change", handleFileSelect, false);
+        document
+          .getElementById("textFile")
+          .addEventListener("change", handleTextFileSelect, false);
+        document.getElementById("hide").addEventListener("click", hide, false);
+        document
+          .getElementById("downloadWord")
+          .addEventListener("click", exportToWord, false);
+        document
+          .getElementById("text")
+          .addEventListener("keyup", UpdateLimit, false);
+        document
+          .getElementById("backEmbedBtn")
+          .addEventListener("click", backToMain, false);
+        document
+          .getElementById("continueExtractBtn")
+          .addEventListener("click", continueToExtract, false);
+
+        // Event listeners cho chế độ phân tách
+        document.getElementById("extractFile").addEventListener(
+          "change",
+          function (evt) {
+            document.getElementById("extractedText").value = "";
+            document.getElementById("extractedMessage").innerHTML = "";
+            document
+              .getElementById("extractedMessageArea")
+              .classList.add("invisible");
+            document.getElementById("downloadExtractedWord").style.display =
+              "none";
+            document.getElementById("extractErrorMessage").textContent = "";
+          },
+          false
+        );
+        document.getElementById("read").addEventListener("click", read, false);
+        document
+          .getElementById("downloadExtractedWord")
+          .addEventListener("click", exportExtractedToWord, false);
+        document
+          .getElementById("backExtractBtn")
+          .addEventListener("click", backToMain, false);
+
+        // Toggle giữa tải văn bản và nhập văn bản
+        document
+          .getElementById("uploadTextBtn")
+          .addEventListener("click", function () {
+            document
+              .getElementById("uploadTextContainer")
+              .classList.remove("invisible");
+            document
+              .getElementById("inputTextContainer")
+              .classList.add("invisible");
+          });
+
+        document
+          .getElementById("inputTextBtn")
+          .addEventListener("click", function () {
+            document
+              .getElementById("inputTextContainer")
+              .classList.remove("invisible");
+            document
+              .getElementById("uploadTextContainer")
+              .classList.add("invisible");
+          });
+
+        document.getElementById("file").addEventListener("change", function () {
+          // Nếu có ảnh được tải lên, cho phép chọn tải văn bản hoặc nhập
+          document.getElementById("uploadTextBtn").disabled = false;
+          document.getElementById("inputTextBtn").disabled = false;
+        });
+
+        document.getElementById("embedErrorMessage").textContent =
+          "Vui lòng tải ảnh lên trước khi chọn tùy chọn.";
+        document.getElementById("uploadTextBtn").disabled = true;
+        document.getElementById("inputTextBtn").disabled = true;
+
+        // Toggle menu
+ // Toggle sidebar visibility
+document.querySelector(".menu-icon").addEventListener("click", function () {
+    const sidebar = document.querySelector(".sidebar");
+    const mainContent = document.querySelector(".main-content");
+
+    sidebar.classList.toggle("active");
+    mainContent.classList.toggle("with-sidebar");
+});
+
+// Đóng sidebar bằng nút đóng
+document.getElementById("closeSidebar").addEventListener("click", function () {
+    var sidebar = document.querySelector(".sidebar");
+    var mainContent = document.querySelector(".main-content");
+
+    sidebar.classList.remove("active");
+    mainContent.classList.remove("with-sidebar");
+});
+
+        
+        // Logout
+        document
+          .getElementById("logoutLink")
+          .addEventListener("click", function () {
+            window.location.href = "/login.html";
+          });
+
+        UpdateLimit();
+      };
     </script>
-</body>
+  </body>
 </html>
