@@ -20,8 +20,8 @@ app.use(session({
 
 const config = {
     user: 'sa',
-    password: '123456789',
-    server: 'localhost',
+    password: '123456',
+    server: 'localhost\\SQLEXPRESS',
     database: 'nhom4', // Đảm bảo tên database chính xác
     options: {
         encrypt: false,
